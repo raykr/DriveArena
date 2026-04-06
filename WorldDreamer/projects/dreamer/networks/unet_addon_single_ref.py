@@ -757,9 +757,9 @@ class SingleRefControlNetModel(ModelMixin, ConfigMixin):
             ret['rel_pose'] = torch.cat([uncond_rel_pose, rel_pose])
         
         if ref_images is not None:
-            ret['ref_images'] = torch.concat([torch.zeros_like(ref_images).to(device=self.device), ref_images], dim=0)
+            ret['ref_images'] = torch.cat([torch.zeros_like(ref_images).to(device=self.device), ref_images], dim=0)
         if layout_canvas is not None:
-            ret['layout_canvas'] = torch.concat([torch.zeros_like(layout_canvas).to(device=self.device), layout_canvas], dim=0)
+            ret['layout_canvas'] = torch.cat([torch.zeros_like(layout_canvas).to(device=self.device), layout_canvas], dim=0)
 
 
         # others, keep original

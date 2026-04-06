@@ -25,9 +25,20 @@ from mmcv.runner import (get_dist_info, init_dist, load_checkpoint,
 import sys
 import os
 
-# Add the parent directory to the Python path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from mmdet3d.models import build_model
+# Prefer the in-repo UniAD tree over globally injected user paths.
+repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+mmdet3d_root = os.environ.get('DRIVEARENA_MMDET3D_ROOT', '/home/raykr/codex/mmdetection3d')
+for injected_path in ('/home/raykr/codex',):
+    while injected_path in sys.path:
+        sys.path.remove(injected_path)
+if os.path.isdir(mmdet3d_root) and mmdet3d_root not in sys.path:
+    sys.path.insert(0, mmdet3d_root)
+if repo_root not in sys.path:
+    sys.path.insert(0, repo_root)
+camixersr_codes = os.path.join(repo_root, 'CAMixerSR', 'codes')
+if os.path.isdir(camixersr_codes) and camixersr_codes not in sys.path:
+    sys.path.insert(0, camixersr_codes)
+from mmdet3d.models.builder import build_model
 from mmdet.apis import set_random_seed
 from projects.mmdet3d_plugin.uniad.apis.test import custom_multi_gpu_test, custom_single_gpu_test
 from mmdet.datasets import replace_ImageToTensor

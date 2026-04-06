@@ -7,9 +7,9 @@ servers:
 simulation:
   ego_id: '283'
   step_length: 0.1
-  gui_display: true
+  gui_display: false
   max_sim_time: 100.0
-  use_agent_path: false # false for open-loop, true for closed-loop
+  use_agent_path: true # false for open-loop, true for closed-loop
 
 # Map Configuration
 map:

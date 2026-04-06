@@ -8,7 +8,12 @@ import json
 import logging
 import os
 import random
+import sys
 from typing import Dict, List, Optional, Tuple, Union
+
+sys.path.append(
+    os.path.join(os.path.dirname(__file__), "..", "third_party", "nuplan-devkit")
+)
 
 import cv2
 import descartes
@@ -19,11 +24,7 @@ import torch
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from matplotlib.patches import Arrow, Rectangle
-from metadrive.scenario import ScenarioDescription as SD
-from metadrive.type import MetaDriveType
 from mpl_toolkits.axes_grid1.inset_locator import mark_inset
-from nuplan.database.maps_db.map_explorer import NuPlanMapExplorer
-from nuplan.database.utils.geometry import view_points
 from nuscenes.eval.common.utils import Quaternion, quaternion_yaw
 from nuscenes.map_expansion.arcline_path_utils import ArcLinePath, discretize_lane
 from nuscenes.map_expansion.bitmap import BitMap
@@ -56,10 +57,37 @@ warnings.filterwarnings("ignore", category=FutureWarning, module="geopandas.geos
 # Suppress SyntaxWarning warnings
 warnings.filterwarnings("ignore", category=SyntaxWarning)
 
-import geopandas as gpd
-from nuplan.common.actor_state.state_representation import Point2D
-from nuplan.common.maps.maps_datatypes import SemanticMapLayer, StopLineType
 from shapely.ops import unary_union
+
+try:
+    import geopandas as gpd
+    from nuplan.common.actor_state.state_representation import Point2D
+    from nuplan.common.maps.maps_datatypes import SemanticMapLayer, StopLineType
+    from nuplan.database.maps_db.map_explorer import NuPlanMapExplorer
+except ImportError:
+    gpd = None
+    Point2D = None
+    SemanticMapLayer = None
+    StopLineType = None
+    NuPlanMapExplorer = None
+
+try:
+    from metadrive.scenario import ScenarioDescription as SD
+    from metadrive.type import MetaDriveType
+except ImportError:
+    class _FallbackScenarioDescription:
+        TYPE = "type"
+
+    class _FallbackMetaDriveType:
+        LANE_SURFACE_STREET = "LANE_SURFACE_STREET"
+        LANE_SURFACE_UNSTRUCTURE = "LANE_SURFACE_UNSTRUCTURE"
+        LINE_BROKEN_SINGLE_WHITE = "LINE_BROKEN_SINGLE_WHITE"
+        LINE_SOLID_SINGLE_WHITE = "LINE_SOLID_SINGLE_WHITE"
+        LINE_UNKNOWN = "LINE_UNKNOWN"
+        CROSSWALK = "CROSSWALK"
+
+    SD = _FallbackScenarioDescription
+    MetaDriveType = _FallbackMetaDriveType
 
 
 # Recommended style to use as the plots will show grids.

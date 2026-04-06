@@ -19,6 +19,59 @@ from TrafficManager.utils.map_utils import (
 )
 
 
+def _apply_scripted_scenario(bbox_list, label_list, gen_prompts, sim_time, scenario):
+    if not scenario or not scenario.get("enabled", False):
+        return gen_prompts
+
+    if scenario.get("type") != "roadside_pedestrian_rush":
+        return gen_prompts
+
+    start_time = float(scenario.get("start_time", 0.0))
+    end_time = float(scenario.get("end_time", start_time))
+    if sim_time is None or sim_time < start_time or sim_time > end_time:
+        return gen_prompts
+
+    progress = 0.0
+    if end_time > start_time:
+        progress = min(max((sim_time - start_time) / (end_time - start_time), 0.0), 1.0)
+
+    pedestrian_cfg = scenario.get("pedestrian", {})
+    x_start = float(pedestrian_cfg.get("x_start", 8.0))
+    x_end = float(pedestrian_cfg.get("x_end", x_start))
+    y_start = float(pedestrian_cfg.get("y_start", -5.5))
+    y_end = float(pedestrian_cfg.get("y_end", -0.6))
+    z = float(pedestrian_cfg.get("z", -0.9))
+    width = float(pedestrian_cfg.get("width", 0.7))
+    length = float(pedestrian_cfg.get("length", 0.7))
+    height = float(pedestrian_cfg.get("height", 1.75))
+    yaw = float(pedestrian_cfg.get("yaw", 0.0))
+    vx = float(pedestrian_cfg.get("vx", 0.0))
+    vy = float(pedestrian_cfg.get("vy", 0.0))
+
+    bbox_list.append(
+        [
+            x_start + progress * (x_end - x_start),
+            y_start + progress * (y_end - y_start),
+            z,
+            width,
+            length,
+            height,
+            yaw,
+            vx,
+            vy,
+        ]
+    )
+    label_list.append(8)  # pedestrian
+
+    prompt_suffix = scenario.get(
+        "prompt_suffix",
+        "a pedestrian suddenly rushes from the right sidewalk into the ego lane",
+    )
+    if prompt_suffix:
+        return f"{gen_prompts}, {prompt_suffix}"
+    return gen_prompts
+
+
 def limsim2diffusion(
     vehicles,
     data_template,
@@ -32,6 +85,8 @@ def limsim2diffusion(
     vel=[5, 0, 0],
     gen_location="singapore-onenorth",
     gen_prompts="daytime, cloudy, downtown, gray buildings, white cars",
+    sim_time=None,
+    scenario=None,
 ):
     VEH_LENGTH = 4.7
     VEH_WIDTH = 1.6
@@ -125,6 +180,10 @@ def limsim2diffusion(
 
         # plot_vehicle((tran_x, tran_y, tran_yaw), color='blue')
         label_list.append(0)  # 0 for vehicle
+
+    gen_prompts = _apply_scripted_scenario(
+        bbox_list, label_list, gen_prompts, sim_time, scenario
+    )
 
     # tran_x, tran_y, tran_yaw = transform((ego_x, ego_y, ego_yaw), (ego_x, ego_y, ego_yaw))
     # tran_x, tran_y, tran_yaw = transform((tran_x, tran_y, tran_yaw), (0, 0, -np.pi/2))

@@ -267,7 +267,8 @@ class UniADTrack(MVXTwoStageDetector):
 
         ref_pts = reference_points @ l2g_r1 + l2g_t1 - l2g_t2
 
-        g2l_r = torch.linalg.inv(l2g_r2).type(torch.float)
+        # l2g_r2 is a rotation matrix, so the inverse is the transpose.
+        g2l_r = l2g_r2.transpose(-1, -2).type(torch.float)
 
         ref_pts = ref_pts @ g2l_r
 
@@ -847,4 +848,3 @@ class UniADTrack(MVXTwoStageDetector):
             result_dict = None
 
         return [result_dict]
-

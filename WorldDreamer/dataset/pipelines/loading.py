@@ -10,16 +10,21 @@ from mmdet.datasets.builder import PIPELINES
 from nuscenes.map_expansion.map_api import NuScenesMap
 from nuscenes.map_expansion.map_api import locations as LOCATIONS
 
-from nuplan.database.maps_db.gpkg_mapsdb import GPKGMapsDB
-from nuplan.common.maps.nuplan_map.nuplan_map import NuPlanMap
-from nuplan.database.maps_db.map_api import NuPlanMapWrapper
-from nuplan.database.maps_db.map_explorer import NuPlanMapExplorer
-from nuplan.database.maps_db.gpkg_mapsdb import MAP_LOCATIONS
+try:
+    from nuplan.database.maps_db.gpkg_mapsdb import GPKGMapsDB
+    from nuplan.common.maps.nuplan_map.nuplan_map import NuPlanMap
+    from nuplan.database.maps_db.map_api import NuPlanMapWrapper
+    from nuplan.database.maps_db.map_explorer import NuPlanMapExplorer
+    from nuplan.database.maps_db.gpkg_mapsdb import MAP_LOCATIONS
+except ImportError:
+    GPKGMapsDB = None
+    NuPlanMap = None
+    NuPlanMapWrapper = None
+    NuPlanMapExplorer = None
+    MAP_LOCATIONS = set()
 from PIL import Image
 
-from mmdet3d.datasets.pipelines.loading_utils import (
-    one_hot_decode,
-)
+from .loading_utils import one_hot_decode
 
 @PIPELINES.register_module()
 class LoadBEVSegmentationS:

@@ -6,7 +6,11 @@ decision making, and planning. It uses the provided roadgraph and vehicle inform
 import copy
 import time
 from typing import Dict, List, Union
-from pynput import keyboard
+
+try:
+    from pynput import keyboard
+except ImportError:
+    keyboard = None
 
 from common.observation import Observation
 from common.vehicle import Behaviour, Vehicle, VehicleType, create_vehicle, create_vehicle_lastseen

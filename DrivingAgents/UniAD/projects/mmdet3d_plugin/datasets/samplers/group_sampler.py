@@ -8,7 +8,11 @@ from mmcv.runner import get_dist_info
 from torch.utils.data import Sampler
 from .sampler import SAMPLER
 import random
-from IPython import embed
+try:
+    from IPython import embed
+except ImportError:
+    def embed(*args, **kwargs):
+        return None
 
 
 @SAMPLER.register_module()
@@ -107,4 +111,3 @@ class DistributedGroupSampler(Sampler):
 
     def set_epoch(self, epoch):
         self.epoch = epoch
-

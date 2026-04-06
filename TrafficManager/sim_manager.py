@@ -1,3 +1,4 @@
+import argparse
 import base64
 from datetime import datetime
 import io
@@ -71,6 +72,7 @@ class SimulationManager:
         self.GEN_PROMPT = self.config['map']['gen_description']
         self.IMAGE_SIZE = self.config['image']['size']
         self.TARGET_SIZE = tuple(self.config['image']['target_size'])
+        self.SCENARIO_CFG = self.config.get('scenario', {})
 
     def setup_paths(self):
         data_root = os.path.dirname(os.path.abspath(__file__))
@@ -186,6 +188,8 @@ class SimulationManager:
                 self.accel, self.rotation_rate, self.vel,
                 gen_location=self.MAP_NAME,
                 gen_prompts=self.GEN_PROMPT,
+                sim_time=self.timestamp,
+                scenario=self.SCENARIO_CFG,
             )
             self.last_pose = diffusion_data['metas']['ego_pos']
             gen_images = self.send_request_diffusion(diffusion_data)
@@ -291,12 +295,24 @@ class SimulationManager:
         if self.scorer:
             self.scorer.save()
         self.model.destroy()
-        self.gui.terminate()
-        self.gui.join()
+        if self.gui and getattr(self.gui, "_popen", None) is not None:
+            self.gui.terminate()
+            self.gui.join()
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description='Run DriveArena TrafficManager.')
+    parser.add_argument(
+        '--config',
+        default='./TrafficManager/config.yaml',
+        help='Path to TrafficManager YAML config.',
+    )
+    return parser.parse_args()
 
 
 def main():
-    sim_manager = SimulationManager('./TrafficManager/config.yaml')
+    args = parse_args()
+    sim_manager = SimulationManager(args.config)
     sim_manager.run_simulation()
 
 

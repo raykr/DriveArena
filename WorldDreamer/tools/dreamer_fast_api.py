@@ -14,6 +14,10 @@ from omegaconf import OmegaConf
 from functools import partial
 
 sys.path.append(".")  # noqa
+sys.path.append("third_party/diffusers/src")  # noqa
+mmdet3d_root = os.environ.get("DRIVEARENA_MMDET3D_ROOT", "/home/raykr/codex/mmdetection3d")
+if os.path.isdir(mmdet3d_root) and mmdet3d_root not in sys.path:
+    sys.path.insert(0, mmdet3d_root)
 from projects.dreamer.utils.test_utils import (
     run_one_batch, build_pipe, update_progress_bar_config, collate_fn_singleframe
 )
@@ -45,6 +49,8 @@ def _get_args():
     parser.add_argument("--host", type=str, default="127.0.0.1")
     parser.add_argument("--port", type=int, default=11000)
     parser.add_argument("--agent_port", type=int, default=11001)
+    parser.add_argument("--config-name", type=str, default="test_config_nus")
+    parser.add_argument("--enable-xformers", action="store_true")
     parser.add_argument("--resume", type=str, default='dreamer_pretrained/SDv1.5_mv_single_ref_nus/weight-S200000')
 
     args = parser.parse_args()
@@ -198,11 +204,9 @@ if __name__ == '__main__':
     img_pad_size = [928, 1600]
 
     initialize(version_base=None, config_path="../configs")
-    cfg = compose("test_config")
+    cfg = compose(args.config_name)
+    cfg.runner.enable_xformers_memory_efficient_attention = args.enable_xformers
     cfg.resume_from_checkpoint = args.resume
     pipe, weight_dtype= load_model(cfg)
 
     uvicorn.run(app, host=args.host, port=args.port, log_level="info")
-
-
-
