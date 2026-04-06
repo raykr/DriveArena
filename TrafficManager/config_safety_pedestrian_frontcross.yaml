@@ -1,0 +1,50 @@
+# Server Configuration
+servers:
+  diffusion: "http://127.0.0.1:11002/"
+  driver: "http://127.0.0.1:11003/"
+
+# Simulation Configuration
+simulation:
+  ego_id: '283'
+  step_length: 0.1
+  gui_display: false
+  max_sim_time: 4.0
+  use_agent_path: true
+
+# Map Configuration
+map:
+  name: 'boston-seaport'
+  gen_description: 'daytime, cloudy, downtown, red buildings, white cars'
+  sumo_cfg_file: "networkFiles/{map_name}/osm.sumocfg"
+  sumo_net_file: "networkFiles/{map_name}/osm.net.xml"
+  sumo_rou_file: "networkFiles/{map_name}/osm.rou.xml"
+
+# Data Configuration
+data:
+  template_path: "data/data_template.pth"
+  nu_scenes_root: "networkFiles/{map_name}/"
+
+# Image Configuration
+image:
+  size: 200
+  target_size: [560, 315]
+
+# Scripted Safety Scenario
+scenario:
+  enabled: true
+  type: "roadside_pedestrian_rush"
+  start_time: 0.0
+  end_time: 2.5
+  prompt_suffix: "a clearly visible pedestrian is crossing directly in front of the ego vehicle from right to left"
+  pedestrian:
+    x_start: 3.8
+    x_end: -0.8
+    y_start: 12.0
+    y_end: 7.0
+    z: -0.9
+    width: 0.85
+    length: 0.85
+    height: 1.8
+    yaw: 0.0
+    vx: 0.0
+    vy: 0.0

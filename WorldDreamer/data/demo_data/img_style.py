@@ -48,14 +48,18 @@ def style_dict(style, dataset_root):
         img_path = style_dict[style]
         for path in img_path:
             tmp = cv2.imread(osp.join(dataset_root, path))
+            if tmp is None:
+                ref_images = []
+                break
             tmp_rgb = cv2.cvtColor(tmp, cv2.COLOR_BGR2RGB)
             tmp_rgb = cv2.resize(tmp_rgb, (400, 224))
             tmp_rgb = transform1(tmp_rgb)
             ref_images.append(tmp_rgb)
-    else:
+    if len(ref_images) != 6:
         ref_images = np.ones((224,400,3))*255
         ref_images = transform1(ref_images)
         ref_images = ref_images.unsqueeze(0).repeat(6, 1, 1, 1)
-    ref_images = torch.stack(ref_images)
+    elif isinstance(ref_images, list):
+        ref_images = torch.stack(ref_images)
     ref_images = ref_images.cuda()
     return ref_images
