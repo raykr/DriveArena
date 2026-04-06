@@ -11,6 +11,9 @@ pretrained
 pretrained/*
 dreamer_pretrained
 dreamer_pretrained/*
+.local_assets
+.local_wheels
+.local_wheels_magic
 
 # vscode
 .vscode/*
